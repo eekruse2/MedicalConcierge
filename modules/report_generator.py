@@ -3,7 +3,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-import openai
+from openai import OpenAI
+
+client = OpenAI()
 
 from modules import resource_api
 
@@ -94,10 +96,8 @@ def generate_doctor_report(persist: bool = False) -> Optional[str]:
     full_prompt = "\n".join(prompt_lines)
 
     # Call OpenAI's ChatCompletion
-    response = openai.ChatCompletion.create(
-        model="gpt-4-1",  # or your preferred-compatible model name
-        messages=[{"role": "user", "content": full_prompt}],
-    )
+    response = client.chat.completions.create(model="gpt-4-1",  # or your preferred-compatible model name
+    messages=[{"role": "user", "content": full_prompt}])
     report_text = response.choices[0].message.content.strip()
 
     # If requested, save the report to disk

@@ -1,5 +1,7 @@
 import json
-import openai
+from openai import OpenAI
+
+client = OpenAI()
 from modules import resource_api
 from config import DEMO_MODE
 
@@ -35,10 +37,8 @@ def analyze_test_results(result_file_path: str) -> dict:
         )
 
         # 6. Call OpenAI’s ChatCompletion endpoint with GPT-4.1
-        resp = openai.ChatCompletion.create(
-            model="gpt-4.1",
-            messages=[{"role": "user", "content": prompt}],
-        )
+        resp = client.chat.completions.create(model="gpt-4.1",
+        messages=[{"role": "user", "content": prompt}])
         analysis = resp.choices[0].message.content
 
     # 7. Store the summary in "test_results_summary" and return it

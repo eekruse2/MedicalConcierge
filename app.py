@@ -15,7 +15,6 @@ from config import OPENAI_API_KEY, DEMO_MODE
 import openai
 import os
 
-openai.api_key = OPENAI_API_KEY
 app = FastAPI()
 
 # Ensure directories exist

@@ -2,7 +2,9 @@ import os
 import json
 from typing import Dict, Any, List
 
-import openai
+from openai import OpenAI
+
+client = OpenAI()
 from modules import resource_api
 from config import DEMO_MODE
 from PyPDF2 import PdfReader
@@ -47,8 +49,8 @@ def analyze_medical_file(file_path: str) -> Dict[str, Any]:
     # 3. (Optional) create embeddings for each chunk
     embeddings: List[List[float]] = []
     for chunk in chunks:
-        resp = openai.Embedding.create(model="o3-embedding-1", input=chunk)
-        embeddings.append(resp["data"][0]["embedding"])
+        resp = client.embeddings.create(model="o3-embedding-1", input=chunk)
+        embeddings.append(resp.data[0].embedding)
         # If desired, store (file_path, chunk_index, embedding) via resource_api or another store
 
     # 4. Build a prompt to get structured JSON from GPT
@@ -62,10 +64,8 @@ def analyze_medical_file(file_path: str) -> Dict[str, Any]:
         f"Here is the extracted text:\n\n{extracted_text}"
     )
 
-    resp = openai.ChatCompletion.create(
-        model="gpt-4.1",
-        messages=[{"role": "user", "content": prompt}],
-    )
+    resp = client.chat.completions.create(model="gpt-4.1",
+    messages=[{"role": "user", "content": prompt}])
     content = resp.choices[0].message.content
 
     # 5. Parse the JSON string returned by the model

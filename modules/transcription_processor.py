@@ -1,5 +1,7 @@
 import os
-import openai
+from openai import OpenAI
+
+client = OpenAI()
 from modules import resource_api
 from config import DEMO_MODE
 
@@ -26,10 +28,8 @@ def transcribe_and_summarize(file_path: str, is_audio: bool = False) -> str:
         "2) Visit Summary (bulleted list of key decisions, med changes, follow-up tasks)."
     )
 
-    resp = openai.ChatCompletion.create(
-        model="gpt-4.1",
-        messages=[{"role": "user", "content": prompt}],
-    )
+    resp = client.chat.completions.create(model="gpt-4.1",
+    messages=[{"role": "user", "content": prompt}])
 
     transcript_output = resp.choices[0].message.content
     transcript_id = f"transcript_{len(resource_api.list_resources('appointment_transcripts')) + 1}"
