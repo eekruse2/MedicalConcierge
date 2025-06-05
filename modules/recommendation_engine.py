@@ -48,7 +48,3 @@ def generate_recommendations() -> str:
         messages=[{"role": "user", "content": prompt}],
     )
     return resp.choices[0].message.content
-
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return resp.choices[0].message.content
