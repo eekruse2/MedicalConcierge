@@ -1,0 +1,4 @@
+[00:00] Dr. Smith: Good afternoon, John. I reviewed your labs. Your blood glucose is still elevated at 150 mg/dL, and your LDL is 140 mg/dL.
+[00:15] Patient: I’ve been following the diet you recommended, but my numbers haven’t budged.
+[00:30] Dr. Smith: Let’s increase your atorvastatin to 40 mg daily and start semaglutide 0.5 mg weekly. We’ll recheck labs in 3 months.
+[00:45] Patient: That sounds good. Thank you.
