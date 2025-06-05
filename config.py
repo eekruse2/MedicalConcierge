@@ -1,6 +1,6 @@
 import os
 
-# Retrieve your OpenAI API key from the environment variable OPENAPI_KEY,
+# Retrieve your OpenAI API key from the environment variable OPEN_API_KEY,
 # otherwise default to a test key.
 OPEN_API_KEY = os.getenv("OPEN_API_KEY", "sk-test")
 

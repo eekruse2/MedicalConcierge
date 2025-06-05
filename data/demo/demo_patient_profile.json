@@ -2,11 +2,30 @@
   "id": "profile_1",
   "name": "John Doe",
   "dob": "1990-04-12",
-  "diagnoses": ["Hypertension", "Type 2 Diabetes Mellitus"],
-  "medications": ["Lisinopril 10 mg daily", "Metformin 500 mg BID"],
-  "labs": [
-    {"name": "HbA1c", "value": "7.2%", "date": "2025-05-10"},
-    {"name": "LDL", "value": "150 mg/dL", "date": "2025-05-10"}
+  "diagnoses": [
+    "Hypertension",
+    "Type 2 Diabetes Mellitus"
   ],
-  "provider_info": {"name": "Dr. Smith", "phone": "555-1234", "address": "123 Main St"}
+  "medications": [
+    "Lisinopril 10 mg daily",
+    "Metformin 500 mg BID"
+  ],
+  "labs": [
+    {
+      "name": "HbA1c",
+      "value": "7.2%",
+      "date": "2025-05-10"
+    },
+    {
+      "name": "LDL",
+      "value": "150 mg/dL",
+      "date": "2025-05-10"
+    }
+  ],
+  "provider_info": {
+    "name": "Dr. Smith",
+    "phone": "555-1234",
+    "address": "123 Main St"
+  }
 }
+
