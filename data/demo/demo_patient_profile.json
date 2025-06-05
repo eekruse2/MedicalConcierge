@@ -1,0 +1,11 @@
+{
+  "diagnoses": ["demo diagnosis"],
+  "medications": ["demo med"],
+  "labs": [
+    {"name": "demo lab", "value": "1", "date": "2023-01-01"}
+  ],
+  "provider_info": {
+    "clinic": "Demo Clinic",
+    "phone": "123-456-7890"
+  }
+}
