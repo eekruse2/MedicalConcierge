@@ -1,7 +1,9 @@
-# tryit
-## Modules
+# AI Medical Concierge Demo - love me
 
-### results_analyzer
+This project provides a small FastAPI application demonstrating a medical concierge workflow.
 
-`analyze_test_results(result_file_path)` loads a new test results JSON, compares the labs against the latest `patient_profile` resource using GPT-4.1, and stores a summary in `test_results_summary` resources via `resource_api`.
+## Quick start
 
+bash
+pip install -r requirements.txt
+uvicorn app:app --reload
