@@ -18,48 +18,48 @@ def extract_text_from_pdf(pdf_path: str) -> str:
 
 def chunk_text(full_text: str, max_chars: int = 3000) -> List[str]:
     """Very naive: split every `max_chars` characters."""
-    chunks = []
+    chunks: List[str] = []
     for i in range(0, len(full_text), max_chars):
         chunks.append(full_text[i : i + max_chars])
     return chunks
 
 
 def analyze_medical_file(file_path: str) -> Dict[str, Any]:
-    """Returns a patient_profile dict."""
-    # 1. DEMO_MODE fallback
+    """Returns a patient_profile dict after extracting and summarizing the PDF."""
+    # 1. DEMO_MODE fallback for a known demo PDF
     if DEMO_MODE and os.path.basename(file_path) == "demo_scan.pdf":
         demo_json_path = os.path.join(
             os.path.dirname(__file__), "..", "data", "demo", "demo_patient_profile.json"
         )
         with open(demo_json_path, "r") as f:
             profile = json.load(f)
-        # assign a fake ID if not present
-        profile.setdefault(
-            "id", f"profile_{len(resource_api.list_resources('patient_profile')) + 1}"
-        )
+
+        # Assign a unique ID and persist
+        next_id = len(resource_api.list_resources("patient_profile")) + 1
+        profile.setdefault("id", f"profile_{next_id}")
         resource_api.create_resource("patient_profile", profile)
         return profile
 
-    # 2. Otherwise: real extraction
+    # 2. Real extraction path
     extracted_text = extract_text_from_pdf(file_path)
     chunks = chunk_text(extracted_text)
 
-    # 3. (Optional) create embeddings for each chunk with o3
-    embeddings = []
+    # 3. (Optional) create embeddings for each chunk
+    embeddings: List[List[float]] = []
     for chunk in chunks:
         resp = openai.Embedding.create(model="o3-embedding-1", input=chunk)
         embeddings.append(resp["data"][0]["embedding"])
-        # You could store (file_id, chunk_index, embedding) in memory if needed
+        # If desired, store (file_path, chunk_index, embedding) via resource_api or another store
 
-    # 4. Build a prompt to get structured JSON
+    # 4. Build a prompt to get structured JSON from GPT
     prompt = (
         "You are an AI-powered medical assistant. Summarize the following clinical notes. "
-        "Output strictly valid JSON with keys: 'diagnoses' (list of strings), "
-        "'medications' (list of strings), "
-        "'labs' (list of {name, value, date}), "
-        "'provider_info' (clinic name, phone). "
-        "Here is the extracted text:\n\n"
-        f"{extracted_text}"
+        "Output strictly valid JSON with keys:\n"
+        "  - 'diagnoses' (list of strings),\n"
+        "  - 'medications' (list of strings),\n"
+        "  - 'labs' (list of {name, value, date}),\n"
+        "  - 'provider_info' (clinic name and phone).\n\n"
+        f"Here is the extracted text:\n\n{extracted_text}"
     )
 
     resp = openai.ChatCompletion.create(
@@ -68,11 +68,13 @@ def analyze_medical_file(file_path: str) -> Dict[str, Any]:
     )
     content = resp.choices[0].message.content
 
-    # 5. Parse the JSON string
+    # 5. Parse the JSON string returned by the model
     profile: Dict[str, Any] = json.loads(content)
 
-    # 6. Assign an ID and store as a resource
-    profile_id = f"profile_{len(resource_api.list_resources('patient_profile')) + 1}"
+    # 6. Assign a unique ID and store as a resource
+    next_id = len(resource_api.list_resources("patient_profile")) + 1
+    profile_id = f"profile_{next_id}"
     profile["id"] = profile_id
     resource_api.create_resource("patient_profile", profile)
+
     return profile
