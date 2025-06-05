@@ -1,9 +1,13 @@
-# In-memory resource store
-RESOURCE_STORE: Dict[str, List[Dict[str, Any]]] = {}
+from typing import Any, Dict, List
+
+# Simple in-memory resource store for demonstration
+RESOURCE_STORE: Dict[str, List[Dict[str, Any]]] = {
+    "patient_profile": []
+}
 
 
 def list_resources(name: str) -> List[Dict[str, Any]]:
-    """Return a list of resources for the given resource type."""
+    """Return all resources of a given type."""
     return RESOURCE_STORE.get(name, [])
 
 
