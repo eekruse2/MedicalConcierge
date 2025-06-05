@@ -28,12 +28,15 @@ def chunk_text(full_text: str, max_chars: int = 3000) -> List[str]:
 
 def analyze_medical_file(file_path: str) -> Dict[str, Any]:
     """Returns a patient_profile dict after extracting and summarizing the PDF."""
-    # 1. DEMO_MODE fallback for a known demo PDF
-    if DEMO_MODE and os.path.basename(file_path) == "demo_scan.pdf":
+    # 1. DEMO_MODE fallback
+    # In demo mode, avoid expensive or network calls and always return the
+    # bundled demo profile regardless of the uploaded filename. This prevents
+    # internal server errors when running without valid API credentials.
+    if DEMO_MODE:
         demo_json_path = os.path.join(
             os.path.dirname(__file__), "..", "data", "demo", "demo_patient_profile.json"
         )
-        with open(demo_json_path, "r") as f:
+        with open(demo_json_path, "r", encoding="utf-8") as f:
             profile = json.load(f)
 
         # Assign a unique ID and persist
