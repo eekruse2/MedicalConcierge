@@ -1,0 +1,9 @@
+{
+  "date": "2025-06-06",
+  "labs": [
+    {"name": "CMP: Glucose", "value": "150 mg/dL"},
+    {"name": "CMP: Creatinine", "value": "1.1 mg/dL"},
+    {"name": "Lipids: LDL", "value": "140 mg/dL"},
+    {"name": "Lipids: HDL", "value": "40 mg/dL"}
+  ]
+}
