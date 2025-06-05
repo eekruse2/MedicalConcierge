@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+openai
+pydantic
+python-dateutil
+pdfminer.six
+sentence-transformers
+aiofiles
