@@ -1,13 +1,17 @@
-"""Simple stub of the resource API used for demonstration."""
+from typing import Any, Dict, List
 
-from typing import List, Dict
-
-# A placeholder in-memory resource store
-_RESOURCES = {
+# Simple in-memory resource store for demonstration
+RESOURCE_STORE: Dict[str, List[Dict[str, Any]]] = {
     "patient_profile": []
 }
 
 
-def list_resources(resource_type: str) -> List[Dict]:
+def list_resources(name: str) -> List[Dict[str, Any]]:
     """Return all resources of a given type."""
-    return _RESOURCES.get(resource_type, [])
+    return RESOURCE_STORE.get(name, [])
+
+
+def create_resource(name: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Append a new resource payload to the in-memory store."""
+    RESOURCE_STORE.setdefault(name, []).append(payload)
+    return payload
