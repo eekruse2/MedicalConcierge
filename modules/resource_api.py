@@ -1,59 +1,92 @@
 import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import List, Dict, Any
 
-# In‐memory cache for resources loaded from disk (or newly created)
-_resources: Dict[str, List[Dict[str, Any]]] = {}
+# Base directory is two levels up from this file (project_root/modules/resource_api.py → project_root)
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Base directory where JSON “stub” files live (e.g. data/stubs/<resource_type>.json)
-DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "stubs"
+# Directory where “data” lives, and specifically where stubs are stored
+DATA_DIR = BASE_DIR / "data"
+STUB_DIR = DATA_DIR / "stubs"
 
+# Ensure the stubs directory exists
+STUB_DIR.mkdir(parents=True, exist_ok=True)
 
-def _load_resource_file(resource_type: str) -> List[Dict[str, Any]]:
+# Map certain resource names to specific filenames under the stubs directory
+RESOURCE_FILE_MAP: Dict[str, str] = {
+    "calendar_events": "calendar.json",
+    # You can add other mappings here if needed
+}
+
+def _get_stub_path(resource_name: str) -> Path:
     """
-    Attempt to read data/stubs/<resource_type>.json from disk.
-    If it exists and is valid JSON, return the parsed list.
-    Otherwise, return an empty list.
+    Determine the JSON file path for a given resource name in the stubs directory.
+    If there's a specific mapping, use that filename; otherwise, default to <resource_name>.json.
     """
-    path = DATA_DIR / f"{resource_type}.json"
-    if path.exists():
+    filename = RESOURCE_FILE_MAP.get(resource_name, f"{resource_name}.json")
+    return STUB_DIR / filename
+
+def list_resources(resource_name: str) -> List[Dict[str, Any]]:
+    """
+    Load all JSON resources of a given type.
+
+    1) If a folder named data/<resource_name>/ exists, read every .json file inside,
+       parse them individually, and return a list of parsed objects (one per file).
+    2) Otherwise, fall back to reading data/stubs/<mapped_filename>.json as a single JSON list
+       (if that file exists and contains a JSON array).
+    3) If neither exists or parsing fails, return an empty list.
+    """
+    # 1) Check for a directory of individual JSON files at data/<resource_name>/
+    directory = DATA_DIR / resource_name
+    if directory.is_dir():
+        resources: List[Dict[str, Any]] = []
+        for file_path in sorted(directory.glob("*.json")):
+            try:
+                with file_path.open("r", encoding="utf-8") as f:
+                    parsed = json.load(f)
+                    # Only append if it is a dictionary (object)
+                    if isinstance(parsed, dict):
+                        resources.append(parsed)
+            except json.JSONDecodeError:
+                # Skip any invalid JSON file
+                continue
+        return resources
+
+    # 2) Fall back to a single stub file under data/stubs/
+    stub_path = _get_stub_path(resource_name)
+    if stub_path.exists():
         try:
-            return json.loads(path.read_text())
-        except Exception:
-            # If JSON is malformed, just return an empty list
-            return []
+            with stub_path.open("r", encoding="utf-8") as f:
+                data = json.load(f)
+                # Only return if it's a list of objects
+                if isinstance(data, list):
+                    return data  # type: ignore
+        except json.JSONDecodeError:
+            pass
+
+    # 3) Nothing found or parse failures
     return []
 
-
-def list_resources(resource_type: str) -> List[Dict[str, Any]]:
+def create_resource(resource_name: str, payload: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Return all resources of a given type. On first access, tries to load from
-    data/stubs/<resource_type>.json into the in‐memory store.
+    Append a new payload (dict) to the stub file under data/stubs/<resource_name>.json.
+    If the stub file doesn't exist yet, it will be created with a JSON array containing this payload.
+
+    Note: This function does NOT write into the per-file directory (data/<resource_name>/). It only
+    operates on a single JSON file in data/stubs/. If you need directory-based writes, handle that externally.
     """
-    if resource_type not in _resources:
-        _resources[resource_type] = _load_resource_file(resource_type)
-    return _resources[resource_type]
+    # Load existing list (or get empty list)
+    existing = list_resources(resource_name)
+    existing.append(payload)
 
-
-def create_resource(resource_type: str, payload: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Append a new resource payload to the in‐memory store (and write it back to disk).
-    Returns the newly created payload.
-    """
-    # Ensure the in‐memory list is initialized (and, if needed, loaded from disk)
-    if resource_type not in _resources:
-        _resources[resource_type] = _load_resource_file(resource_type)
-
-    _resources[resource_type].append(payload)
-
-    # Try writing the updated list back to DATA_DIR/<resource_type>.json
+    # Write back to the stub file
+    stub_path = _get_stub_path(resource_name)
     try:
-        DATA_DIR.mkdir(parents=True, exist_ok=True)
-        path = DATA_DIR / f"{resource_type}.json"
-        path.write_text(json.dumps(_resources[resource_type], indent=2))
-    except Exception:
-        # If writing fails (permissions, etc.), we silently ignore so that
-        # the in‐memory store still works. In a real app, you might log this.
+        with stub_path.open("w", encoding="utf-8") as f:
+            json.dump(existing, f, indent=2)
+    except OSError:
+        # If writing fails (permissions, etc.), we still return the payload.
         pass
 
     return payload
+

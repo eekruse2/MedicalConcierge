@@ -2,7 +2,9 @@ import os
 import json
 from typing import Dict, Any, List
 
-import openai
+from openai import OpenAI
+
+client = OpenAI()
 from modules import resource_api
 from config import DEMO_MODE
 from PyPDF2 import PdfReader
@@ -26,12 +28,15 @@ def chunk_text(full_text: str, max_chars: int = 3000) -> List[str]:
 
 def analyze_medical_file(file_path: str) -> Dict[str, Any]:
     """Returns a patient_profile dict after extracting and summarizing the PDF."""
-    # 1. DEMO_MODE fallback for a known demo PDF
-    if DEMO_MODE and os.path.basename(file_path) == "demo_scan.pdf":
+    # 1. DEMO_MODE fallback
+    # In demo mode, avoid expensive or network calls and always return the
+    # bundled demo profile regardless of the uploaded filename. This prevents
+    # internal server errors when running without valid API credentials.
+    if DEMO_MODE:
         demo_json_path = os.path.join(
             os.path.dirname(__file__), "..", "data", "demo", "demo_patient_profile.json"
         )
-        with open(demo_json_path, "r") as f:
+        with open(demo_json_path, "r", encoding="utf-8") as f:
             profile = json.load(f)
 
         # Assign a unique ID and persist
@@ -47,8 +52,8 @@ def analyze_medical_file(file_path: str) -> Dict[str, Any]:
     # 3. (Optional) create embeddings for each chunk
     embeddings: List[List[float]] = []
     for chunk in chunks:
-        resp = openai.Embedding.create(model="o3-embedding-1", input=chunk)
-        embeddings.append(resp["data"][0]["embedding"])
+        resp = client.embeddings.create(model="o3-embedding-1", input=chunk)
+        embeddings.append(resp.data[0].embedding)
         # If desired, store (file_path, chunk_index, embedding) via resource_api or another store
 
     # 4. Build a prompt to get structured JSON from GPT
@@ -62,10 +67,8 @@ def analyze_medical_file(file_path: str) -> Dict[str, Any]:
         f"Here is the extracted text:\n\n{extracted_text}"
     )
 
-    resp = openai.ChatCompletion.create(
-        model="gpt-4.1",
-        messages=[{"role": "user", "content": prompt}],
-    )
+    resp = client.chat.completions.create(model="gpt-4.1",
+    messages=[{"role": "user", "content": prompt}])
     content = resp.choices[0].message.content
 
     # 5. Parse the JSON string returned by the model

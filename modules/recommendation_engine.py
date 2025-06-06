@@ -1,4 +1,6 @@
-import openai
+from openai import OpenAI
+
+client = OpenAI()
 from datetime import datetime
 from modules import resource_api
 from config import DEMO_MODE
@@ -43,12 +45,6 @@ def generate_recommendations() -> str:
         "Please output concise bullet points and cite relevant guidelines (e.g., ADA, ACC)."
     )
 
-    resp = openai.ChatCompletion.create(
-        model="gpt-4.1",
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return resp.choices[0].message.content
-
-        messages=[{"role": "user", "content": prompt}],
-    )
+    resp = client.chat.completions.create(model="gpt-4.1",
+    messages=[{"role": "user", "content": prompt}])
     return resp.choices[0].message.content

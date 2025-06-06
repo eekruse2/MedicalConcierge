@@ -1,12 +1,12 @@
-# AI Medical Concierge Demo - love me
+# AI Medical Concierge Demo
 
 This project provides a small FastAPI application demonstrating a medical concierge workflow.
 
 ## Quick start
 
-```bash
-pip install -r requirements.txt
-uvicorn app:app --reload
-```
+1. Ensure you have **Python 3.10** or newer installed.
+2. Clone this repository and change into the project directory:
 
-Then open <http://localhost:8000/> in your browser.
+   ```bash
+   git clone <repo-url>
+   cd tryit
