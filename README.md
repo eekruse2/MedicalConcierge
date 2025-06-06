@@ -10,3 +10,4 @@ This project provides a small FastAPI application demonstrating a medical concie
    ```bash
    git clone <repo-url>
    cd tryit
+
