@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import List, Dict, Any
 
-# Base directory is two levels up from this file (project_root/modules/resource_api.py → project_root)
+# Base directory is two levels up from this file (e.g. project_root/modules/resource_api.py → project_root)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Directory where “data” lives, and specifically where stubs are stored
@@ -15,7 +15,7 @@ STUB_DIR.mkdir(parents=True, exist_ok=True)
 # Map certain resource names to specific filenames under the stubs directory
 RESOURCE_FILE_MAP: Dict[str, str] = {
     "calendar_events": "calendar.json",
-    # You can add other mappings here if needed
+    # Add other mappings here if you want a custom filename for a resource
 }
 
 def _get_stub_path(resource_name: str) -> Path:
@@ -44,7 +44,7 @@ def list_resources(resource_name: str) -> List[Dict[str, Any]]:
             try:
                 with file_path.open("r", encoding="utf-8") as f:
                     parsed = json.load(f)
-                    # Only append if it is a dictionary (object)
+                    # Only append if it is a dict
                     if isinstance(parsed, dict):
                         resources.append(parsed)
             except json.JSONDecodeError:
@@ -75,7 +75,7 @@ def create_resource(resource_name: str, payload: Dict[str, Any]) -> Dict[str, An
     Note: This function does NOT write into the per-file directory (data/<resource_name>/). It only
     operates on a single JSON file in data/stubs/. If you need directory-based writes, handle that externally.
     """
-    # Load existing list (or get empty list)
+    # Load existing list (or get an empty list)
     existing = list_resources(resource_name)
     existing.append(payload)
 
