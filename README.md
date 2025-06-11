@@ -1,6 +1,8 @@
-# AI Medical Concierge Demo
+# AI Medical Concierge 
 
-This project provides a small FastAPI application demonstrating a medical concierge workflow.
+USer uploads health data. AI concierge (made up of multiple agents), analyzes data, makes recommendations, orders at home lab tests, books doctors appointments, takes appointment recording and distills information, adding it to record. 
+
+FastAPI application demonstrating a medical concierge workflow.
 
 ## Quick start
 
